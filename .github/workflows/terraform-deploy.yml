@@ -7,7 +7,8 @@ on:
   pull_request:
 
 env:
-  TF_VAR_project_id: 'cts08-avadhootb-projs'
+  # Passed as a GitHub Secret to avoid hardcoding infrastructure details in a public repository
+  TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
 
 # CRITICAL: These permissions are required for OIDC authentication
 permissions:
@@ -30,8 +31,10 @@ jobs:
     - name: Authenticate to Google Cloud via WIF
       uses: google-github-actions/auth@v2
       with:
-        workload_identity_provider: 'projects/695532881413/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
-        service_account: 'github-actions-tf@cts08-avadhootb-projs.iam.gserviceaccount.com'
+        # Workload Identity Federation details are kept in secrets to prevent 
+        # exposing internal GCP infrastructure mapping to bad actors.
+        workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+        service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
